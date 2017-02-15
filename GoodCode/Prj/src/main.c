@@ -6,74 +6,74 @@
 #include "delay.h"
 #include "uart.h"
 
-//¶¨Òå´®×ª²¢¶Ë¿Ú¿ÉÎ»Ñ°Ö·
+//å®šä¹‰ä¸²è½¬å¹¶ç«¯å£å¯ä½å¯»å€
 //UCHAR bdata PORT1, PORT2;
 
-//¶Ë¿Ú¶¨Òå
-sbit RA1=P3^3; //µçÈİ³ä·Åµç
-sbit RA0=P3^2; //±È½ÏÆ÷µçÆ½
-sbit CTRL=P3^5; //T12¼ÓÈÈ¿ØÖÆ
+//ç«¯å£å®šä¹‰
+sbit RA1=P3^3; //ç”µå®¹å……æ”¾ç”µ
+sbit RA0=P3^2; //æ¯”è¾ƒå™¨ç”µå¹³
+sbit CTRL=P3^5; //T12åŠ çƒ­æ§åˆ¶
 
-sbit LED=P3^4;  //led¿ØÖÆ µ÷ÊÔÊ¹ÓÃ
+sbit LED=P3^4;  //ledæ§åˆ¶ è°ƒè¯•ä½¿ç”¨
 
-bit bSendData; //·¢ËÍÊı¾İµ½´®¿Ú
-unsigned int ADCResult;	//AD·µ»ØÖµ
+bit bSendData; //å‘é€æ•°æ®åˆ°ä¸²å£
+unsigned int ADCResult;	//ADè¿”å›å€¼
 
-SysConfig config; //ÏµÍ³²ÎÊı
-SPid pid; // PID ¿ØÖÆ½á¹¹
+SysConfig config; //ç³»ç»Ÿå‚æ•°
+SPid pid; // PID æ§åˆ¶ç»“æ„
 
-unsigned char high_time, max_time,count;//Õ¼¿Õ±Èµ÷½Ú²ÎÊı
-unsigned int tickCount; //ÏµÍ³¼ÆÊ±Æ÷
+unsigned char high_time, max_time,count;//å ç©ºæ¯”è°ƒèŠ‚å‚æ•°
+unsigned int tickCount; //ç³»ç»Ÿè®¡æ—¶å™¨
 
 int pTerm, dTerm, iTerm, drive;
 
 void main (void)
 {
-    //×ÜÖĞ¶Ï¿ªÆô
+    //æ€»ä¸­æ–­å¼€å¯
     EA = 1;
 
-    //¶¨Ê±Æ÷³õÊ¼»¯ ¶¨Ê±Æ÷0ÓÃÓÚAD¼ÆÊıÓë´®¿Ú²Ù×÷ ¶¨Ê±Æ÷1ÓÃÓÚÏµÍ³¼ÆÊıpwmµ÷ÕûµÈ
-    //ÉèÖÃ¶¨Ê±Æ÷0, 1¹¤×÷ÔÚ1TÄ£Ê½
+    //å®šæ—¶å™¨åˆå§‹åŒ– å®šæ—¶å™¨0ç”¨äºADè®¡æ•°ä¸ä¸²å£æ“ä½œ å®šæ—¶å™¨1ç”¨äºç³»ç»Ÿè®¡æ•°pwmè°ƒæ•´ç­‰
+    //è®¾ç½®å®šæ—¶å™¨0, 1å·¥ä½œåœ¨1Tæ¨¡å¼
     AUXR = 0xC0;
-    //ÖÃ¶¨Ê±Æ÷0, 1 ¹¤×÷Ä£Ê½0 16Î»×Ô¶¯ÖØ×°¶¨Ê±Æ÷
+    //ç½®å®šæ—¶å™¨0, 1 å·¥ä½œæ¨¡å¼0 16ä½è‡ªåŠ¨é‡è£…å®šæ—¶å™¨
     TMOD = 0x0;
 
-    //½«T12¼ÓÈÈ¿ØÖÆ¿ÚÉèÖÃÎªÍÆÍìÊä³ö ×î¸ßÊä³ö20ma ·ñÔòĞèÒªÉÏÀ­µç×è
+    //å°†T12åŠ çƒ­æ§åˆ¶å£è®¾ç½®ä¸ºæ¨æŒ½è¾“å‡º æœ€é«˜è¾“å‡º20ma å¦åˆ™éœ€è¦ä¸Šæ‹‰ç”µé˜»
     P3M1 = P3M1 & 0x1F;
     P3M0 = P3M0 | 0x20;
-    //¹Ø±ÕT12¼ÓÈÈ
+    //å…³é—­T12åŠ çƒ­
     CTRL = 0;
 
-    /*¹¦ÄÜ: ³õÊ¼»¯ADÏà¹Ø*/
-    RA1 = 1; //µçÈİ·Åµç
-    //½«µçÈİ·Åµç¿ÚÉèÖÃÎªÍÆÍìÊä³ö ×î¸ßÊä³ö20ma ·ñÔòĞèÒªÉÏÀ­µç×è
+    /*åŠŸèƒ½: åˆå§‹åŒ–ADç›¸å…³*/
+    RA1 = 1; //ç”µå®¹æ”¾ç”µ
+    //å°†ç”µå®¹æ”¾ç”µå£è®¾ç½®ä¸ºæ¨æŒ½è¾“å‡º æœ€é«˜è¾“å‡º20ma å¦åˆ™éœ€è¦ä¸Šæ‹‰ç”µé˜»
     P3M1 = P3M1 & 0x30;
     P3M0 = P3M0 | 0x08;
 
     while(1)
     {
-        //´®¿Ú³õÊ¼»¯
+        //ä¸²å£åˆå§‹åŒ–
         UartInit();
-        //µÈ´ı´®¿ÚÃüÁî
+        //ç­‰å¾…ä¸²å£å‘½ä»¤
         while( uartDataSize < 16);
         UART_Command();
         if (TR1)
         {
-            //¹¤×÷Ò»¶¨Ê±¼äºóÍ£Ö¹¹¤×÷
+            //å·¥ä½œä¸€å®šæ—¶é—´ååœæ­¢å·¥ä½œ
             bSendData = 0;
             while (tickCount < 30000)
             {
                 if (bSendData)
                 {
                     bSendData = 0;
-                    //Ïò´®¿Ú·¢ËÍÊı¾İ
+                    //å‘ä¸²å£å‘é€æ•°æ®
                     UartInit();
                     UART_SendByte(0xff);
                     UART_SendByte(0x55);
                     UART_SendByte(0xc);
                     UART_SendByte(0xff);
                     UART_SendBuf( (unsigned char *)&ADCResult, 2);
-                    UART_SendByte( high_time);	//¼ÓÈÈÊ±¼ä
+                    UART_SendByte( high_time);	//åŠ çƒ­æ—¶é—´
                     UART_SendByte( max_time);
                     UART_SendBuf( (unsigned char *)&pTerm, 2);
                     UART_SendBuf( (unsigned char *)&iTerm, 2);
@@ -89,70 +89,70 @@ void main (void)
 
 void StartWork(void)
 {
-    /*¹¦ÄÜ: ¿ªÊ¼¹¤×÷*/
+    /*åŠŸèƒ½: å¼€å§‹å·¥ä½œ*/
     tickCount = 0;
     count = 0;
     max_time = MAX_PWM_TIME;
     high_time = MAX_PWM_TIME; //0-100
     memset ( &pid,0,sizeof(SPid));
-    /*pid.pGain = 40; // Set PID Coefficients  ±ÈÀı³£Êı Proportional Const
-    pid.iGain = 1;    //»ı·Ö³£Êı Integral Const
-    pid.dGain = 50;   //Î¢·Ö³£Êı Derivative Const
+    /*pid.pGain = 40; // Set PID Coefficients  æ¯”ä¾‹å¸¸æ•° Proportional Const
+    pid.iGain = 1;    //ç§¯åˆ†å¸¸æ•° Integral Const
+    pid.dGain = 50;   //å¾®åˆ†å¸¸æ•° Derivative Const
     */
-    pid.pGain = config.pGain; // Set PID Coefficients  ±ÈÀı³£Êı Proportional Const
-    pid.iGain = config.iGain;    //»ı·Ö³£Êı Integral Const
-    pid.dGain = config.dGain;   //Î¢·Ö³£Êı Derivative Const
+    pid.pGain = config.pGain; // Set PID Coefficients  æ¯”ä¾‹å¸¸æ•° Proportional Const
+    pid.iGain = config.iGain;    //ç§¯åˆ†å¸¸æ•° Integral Const
+    pid.dGain = config.dGain;   //å¾®åˆ†å¸¸æ•° Derivative Const
 
-    //¶¨Ê±Æ÷1³õÊ¼»¯
-    //2ºÁÃë@22.1184MHz ¶¨Ê±Æ÷Ê±ÖÓ1TÄ£Ê½	16Î»×Ô¶¯ÖØ×°¶¨Ê±Æ÷
-    TL1 = 0x33;		//ÉèÖÃ¶¨Ê±³õÖµ
-    TH1 = 0x53;		//ÉèÖÃ¶¨Ê±³õÖµ
-    //1ºÁÃë@33.1776MHz
-    //TL1 = 0x66;		//ÉèÖÃ¶¨Ê±³õÖµ
-    //TH1 = 0x7E;		//ÉèÖÃ¶¨Ê±³õÖµ
+    //å®šæ—¶å™¨1åˆå§‹åŒ–
+    //2æ¯«ç§’@22.1184MHz å®šæ—¶å™¨æ—¶é’Ÿ1Tæ¨¡å¼	16ä½è‡ªåŠ¨é‡è£…å®šæ—¶å™¨
+    TL1 = 0x33;		//è®¾ç½®å®šæ—¶åˆå€¼
+    TH1 = 0x53;		//è®¾ç½®å®šæ—¶åˆå€¼
+    //1æ¯«ç§’@33.1776MHz
+    //TL1 = 0x66;		//è®¾ç½®å®šæ—¶åˆå€¼
+    //TH1 = 0x7E;		//è®¾ç½®å®šæ—¶åˆå€¼
 
-    TF1 = 0;		//Çå³ıTF1±êÖ¾
-    PT1	= 1;        //¸ßÖĞ¶ÏÓÅÏÈ¼¶
-    ET1 = 1;        //ÔÊĞíÖĞ¶Ï
-    TR1 = 1;		//¶¨Ê±Æ÷1¿ªÊ¼¼ÆÊ±
+    TF1 = 0;		//æ¸…é™¤TF1æ ‡å¿—
+    PT1	= 1;        //é«˜ä¸­æ–­ä¼˜å…ˆçº§
+    ET1 = 1;        //å…è®¸ä¸­æ–­
+    TR1 = 1;		//å®šæ—¶å™¨1å¼€å§‹è®¡æ—¶
 }
 
 void StopWork(void)
 {
-    /*¹¦ÄÜ: Í£Ö¹¹¤×÷*/
+    /*åŠŸèƒ½: åœæ­¢å·¥ä½œ*/
     TR1 = 0;
-    //¹Ø±ÕT12¼ÓÈÈ
+    //å…³é—­T12åŠ çƒ­
     CTRL = 0;
-    LED = 1;	  //¹Ø±Õled
+    LED = 1;	  //å…³é—­led
 }
 
 void UART_Command(void)
 {
-    /*¹¦ÄÜ; Ö´ĞĞ´®¿ÚÏà¹ØÃüÁî*/
+    /*åŠŸèƒ½; æ‰§è¡Œä¸²å£ç›¸å…³å‘½ä»¤*/
     UCHAR cmd;
 
     uartDataSize = 0;
 
-    //¼ì²âÃüÁîÍ· FF 55 00 00 ... 55 FF
+    //æ£€æµ‹å‘½ä»¤å¤´ FF 55 00 00 ... 55 FF
     if (!((uartbuf[0] == 0xFF) && (uartbuf[1] == 0x55)	&& (uartbuf[14] == 0x55) && (uartbuf[15] == 0xFF)))
     {
-        //ÃüÁîÍ·´íÎó
+        //å‘½ä»¤å¤´é”™è¯¯
         return;
     }
 
     cmd = uartbuf[2];
     switch ( cmd)
     {
-    case 0:  //¿ªÊ¼¼ÓÈÈ
-        //ÏµÍ³²ÎÊı
+    case 0:  //å¼€å§‹åŠ çƒ­
+        //ç³»ç»Ÿå‚æ•°
         memcpy(&config, &uartbuf[3], sizeof(SysConfig));
-        uartbuf[2] = 0;	 //Êı¾İ´óĞ¡
-        uartbuf[3] = 0;	 //ÃüÁîID
-        UART_SendBuf(uartbuf, 4); //È·ÈÏ¼ÓÈÈ
+        uartbuf[2] = 0;	 //æ•°æ®å¤§å°
+        uartbuf[3] = 0;	 //å‘½ä»¤ID
+        UART_SendBuf(uartbuf, 4); //ç¡®è®¤åŠ çƒ­
         StartWork();
         break;
-    case 1: //Í£Ö¹¼ÓÈÈ
-        uartbuf[2] = 0;	 //Êı¾İ´óĞ¡
+    case 1: //åœæ­¢åŠ çƒ­
+        uartbuf[2] = 0;	 //æ•°æ®å¤§å°
         uartbuf[3] = 1;
         UART_SendBuf(uartbuf, 4);
         StopWork();
@@ -163,60 +163,60 @@ void UART_Command(void)
 void GetADCResult(void)
 {
     /*
-    ¹¦ÄÜ:
-    ¶ÁÈ¡ADC²¢·µ»Ø½á¹û Ä£Ê½ ¼ì²â¶Ë¿ÚµçÆ½
-    Í¨¹ıLM258±È½ÏÆ÷ÊµÏÖAD
-    ¶¨Ê±Æ÷Òç³öÊ±¼ä¼ÆËã µ¥Î»ms ÉèÏµÍ³Ê±ÖÓ SYSclk = 22118400
-    1TÄ£Ê½
+    åŠŸèƒ½:
+    è¯»å–ADCå¹¶è¿”å›ç»“æœ æ¨¡å¼ æ£€æµ‹ç«¯å£ç”µå¹³
+    é€šè¿‡LM258æ¯”è¾ƒå™¨å®ç°AD
+    å®šæ—¶å™¨æº¢å‡ºæ—¶é—´è®¡ç®— å•ä½ms è®¾ç³»ç»Ÿæ—¶é’Ÿ SYSclk = 22118400
+    1Tæ¨¡å¼
     1000/(22118400/65536)	  = 2.96
-    12TÄ£Ê½
+    12Tæ¨¡å¼
     1000/(22118400/12/65536)  = 35.55
-    Multisim ·ÂÕæ½á¹û
-    103 ³äµçµ½2.5v Ô¼0.952ms  T1ÏÂ¸ü¸ßËÙ¶È
-    223 ³äµçµ½2.5v Ô¼2.104ms  T1ÏÂ¸ü¸ß¾«¶È
-    104 ³äµçµ½2.5v Ô¼9.947ms  T12Ä£Ê½
+    Multisim ä»¿çœŸç»“æœ
+    103 å……ç”µåˆ°2.5v çº¦0.952ms  T1ä¸‹æ›´é«˜é€Ÿåº¦
+    223 å……ç”µåˆ°2.5v çº¦2.104ms  T1ä¸‹æ›´é«˜ç²¾åº¦
+    104 å……ç”µåˆ°2.5v çº¦9.947ms  T12æ¨¡å¼
     */
 
-    //¼ì²â»ù×¼µçÑ¹
-    //EA = 0;   //¹Ø±ÕÈ«²¿ÖĞ¶Ï
-    TR0=0;	  //¹Ø±Õ¼ÆÊ±Æ÷
-    ET0 = 0; //²»ÔÊĞíÖĞ¶Ï
+    //æ£€æµ‹åŸºå‡†ç”µå‹
+    //EA = 0;   //å…³é—­å…¨éƒ¨ä¸­æ–­
+    TR0=0;	  //å…³é—­è®¡æ—¶å™¨
+    ET0 = 0; //ä¸å…è®¸ä¸­æ–­
 
-    TF0=0;    //ÇåÒç³öÎ»
-    TH0=0x0;  //¸ø¶¨³õÖµ
+    TF0=0;    //æ¸…æº¢å‡ºä½
+    TH0=0x0;  //ç»™å®šåˆå€¼
     TL0=0x0;
-    RA1 = 0; //µçÈİ³äµç
-    TR0=1; //¿ªÊ¼¼ÆÊı
-    //µÈ´ıµçÈİµçÑ¹Óë»ù×¼µçÑ¹ÏàÍ¬»òÕß¶¨Ê±Æ÷Òç³ö
+    RA1 = 0; //ç”µå®¹å……ç”µ
+    TR0=1; //å¼€å§‹è®¡æ•°
+    //ç­‰å¾…ç”µå®¹ç”µå‹ä¸åŸºå‡†ç”µå‹ç›¸åŒæˆ–è€…å®šæ—¶å™¨æº¢å‡º
     while(!RA0 && !TF0);
 
-    TR0=0;	  //¹Ø±Õ¼ÆÊ±Æ÷
-    //EA = 1;   //¿ªÆôÈ«²¿ÖĞ¶Ï
-    RA1 = 1; //µçÈİ·Åµç
+    TR0=0;	  //å…³é—­è®¡æ—¶å™¨
+    //EA = 1;   //å¼€å¯å…¨éƒ¨ä¸­æ–­
+    RA1 = 1; //ç”µå®¹æ”¾ç”µ
 
     if (TF0)
     {
-        //¶¨Ê±Æ÷Òç³ö »ù×¼µçÑ¹Ì«¸ß? µçÈİ³äµçµçÑ¹Ì«µÍ? µçÈİÌ«´ó?
+        //å®šæ—¶å™¨æº¢å‡º åŸºå‡†ç”µå‹å¤ªé«˜? ç”µå®¹å……ç”µç”µå‹å¤ªä½? ç”µå®¹å¤ªå¤§?
         //ADCResult = 0xfffe;
         ADCResult = 0x400 - config.ad_zeroValueFix;
     }
     else
     {
-        //Ö»È¡¼ÆÊıÖµ¸ß10Î»
+        //åªå–è®¡æ•°å€¼é«˜10ä½
         ADCResult = ((unsigned int)TH0 << 2) | (TL0 >> 6);
         /*
-        µ÷ÁãÔËËã
-        ÒòÎªÔË·ÅÓĞÊ§µ÷µçÑ¹lm358Îª3mv, ËùÒÔµ¥µçÔ´ĞèÒªµ÷Áã. ÒòÎª3½Å½Ó10Kµç×èËùÒÔÒ²»áÓĞÑ¹²î.
-        ¿ÉÒÔÔÚT12ÀÓÌúÍ·Îª³£ÎÂÊ±µÄÖµ×÷Îª0Öµ. ÓÉ T=T0 ÎÂ²îµçÊÆ=0
+        è°ƒé›¶è¿ç®—
+        å› ä¸ºè¿æ”¾æœ‰å¤±è°ƒç”µå‹lm358ä¸º3mv, æ‰€ä»¥å•ç”µæºéœ€è¦è°ƒé›¶. å› ä¸º3è„šæ¥10Kç”µé˜»æ‰€ä»¥ä¹Ÿä¼šæœ‰å‹å·®.
+        å¯ä»¥åœ¨T12çƒ™é“å¤´ä¸ºå¸¸æ¸©æ—¶çš„å€¼ä½œä¸º0å€¼. ç”± T=T0 æ¸©å·®ç”µåŠ¿=0
         */
         if (ADCResult >= config.ad_zeroValueFix)
             ADCResult = ADCResult-config.ad_zeroValueFix;
         else
             ADCResult = 0;
     }
-    //delayms( 2); //µÈ´ıµçÈİ·ÅµçÍê³É Èç¹û²»ÊÇÁ¬Ğøµ÷ÓÃ¿ÉÒÔ×¢ÊÍµô
+    //delayms( 2); //ç­‰å¾…ç”µå®¹æ”¾ç”µå®Œæˆ å¦‚æœä¸æ˜¯è¿ç»­è°ƒç”¨å¯ä»¥æ³¨é‡Šæ‰
 
-    //·ÅµçÑÓ³Ù ÊıÖµ·¶Î§
+    //æ”¾ç”µå»¶è¿Ÿ æ•°å€¼èŒƒå›´
     //1ms 4
     //2ms 5
     //3ms 6
@@ -224,13 +224,13 @@ void GetADCResult(void)
     //20ms 9
     //100ms 7
 
-    //ÊäÈëµçÑ¹=²Î¿¼µçÑ¹*ÊäÈëµçÑ¹¼ÆÊ±Æ÷Öµ/²Î¿¼µçÑ¹¼ÆÊ±Æ÷Öµ
+    //è¾“å…¥ç”µå‹=å‚è€ƒç”µå‹*è¾“å…¥ç”µå‹è®¡æ—¶å™¨å€¼/å‚è€ƒç”µå‹è®¡æ—¶å™¨å€¼
     //V1=Vref*T2/T1
 }
 
 int UpdatePID(int error, int position)
 {
-    /*¹¦ÄÜ: PID¼ÆËã*/
+    /*åŠŸèƒ½: PIDè®¡ç®—*/
     pTerm = pid.pGain * error;   // calculate the proportional term
 
     // calculate the integral state with appropriate limiting
@@ -258,54 +258,54 @@ int UpdatePID(int error, int position)
 
 void Timer1_Interrupt(void) interrupt 3
 {
-    /*¹¦ÄÜ: ÓÃÓÚ¼ÆÊ±,PWMµÈ*/
+    /*åŠŸèƒ½: ç”¨äºè®¡æ—¶,PWMç­‰*/
     int error;
 
     tickCount++;
-    count++; //PWM¼ÆÊıÆ÷
+    count++; //PWMè®¡æ•°å™¨
 
-    //PWMÓëPID¿ØÖÆ
+    //PWMä¸PIDæ§åˆ¶
     if (count<=max_time)
     {
-        //PWMÖÜÆÚ
+        //PWMå‘¨æœŸ
         if (count <= high_time)
         {
-            CTRL = 1; //¼ÓÈÈ
-            LED = 0;	  //¿ªÆôled
+            CTRL = 1; //åŠ çƒ­
+            LED = 0;	  //å¼€å¯led
         }
         else
         {
-            CTRL = 0; //Í£Ö¹
-            LED = 1;	  //¹Ø±Õled
+            CTRL = 0; //åœæ­¢
+            LED = 1;	  //å…³é—­led
         }
     }
     else
     {
-        TR1 = 0; //¹Ø±Õ¶¨Ê±Æ÷
-        CTRL = 0; //Í£Ö¹¼ÓÈÈ
-        LED = 1;	  //¹Ø±Õled
+        TR1 = 0; //å…³é—­å®šæ—¶å™¨
+        CTRL = 0; //åœæ­¢åŠ çƒ­
+        LED = 1;	  //å…³é—­led
 
         if (high_time > 98)
-            delayms(4); //µÈ´ıT12ÉÏµÄµçÈİĞ¹·Å¸É¾»
+            delayms(4); //ç­‰å¾…T12ä¸Šçš„ç”µå®¹æ³„æ”¾å¹²å‡€
 
-        GetADCResult();	 //¶ÁÈ¡ADÖµ
+        GetADCResult();	 //è¯»å–ADå€¼
 
-        //PID¼ÆËã
+        //PIDè®¡ç®—
         max_time = MAX_PWM_TIME;
         error = (int)config.set_temper-(int)ADCResult;
-        if(error>40)  //ÉèÖÃµÄÎÂ¶È±ÈÊµ¼ÊµÄÎÂ¶ÈÊÇ·ñÊÇ´óÓÚn¶È
+        if(error>40)  //è®¾ç½®çš„æ¸©åº¦æ¯”å®é™…çš„æ¸©åº¦æ˜¯å¦æ˜¯å¤§äºnåº¦
         {
-            //È«¹¦ÂÊ¼ÓÈÈ 500ms
+            //å…¨åŠŸç‡åŠ çƒ­ 500ms
             max_time = 250;
             high_time = 250;
         }
         else if(error<-40)
         {
-            //²»¼ÓÈÈ
+            //ä¸åŠ çƒ­
             max_time = 100;
             high_time = 0;
         }
-        else  //Èç¹ûÊÇÔÚn¶È·¶Î§ÄÚ£¬ÔòÔËĞĞPID¼ÆËã
+        else  //å¦‚æœæ˜¯åœ¨nåº¦èŒƒå›´å†…ï¼Œåˆ™è¿è¡ŒPIDè®¡ç®—
         {
             high_time = UpdatePID(error,  ADCResult);
         }
@@ -314,6 +314,6 @@ void Timer1_Interrupt(void) interrupt 3
         bSendData = 1;
 
         count = 0;
-        TR1 = 1; //¿ªÆô¶¨Ê±Æ÷
+        TR1 = 1; //å¼€å¯å®šæ—¶å™¨
     }
 }

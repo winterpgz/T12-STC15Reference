@@ -214,7 +214,7 @@ interrupt 1 //定时0中断函数,用于检测旋转编码器,掉电存储等操
     if(jiareshu>190)//最多加热190ms
     jiareshu=190;
     if(zhouqijishu<=jiareshu)//如果当前计数小于等于加热数
-    t12=1;//就加热
+    t12=1;//就加热adc
     else//否则
     t12=0;//不加热
     if(t12wendu==5000)//如果t12温度为500,说明没有插入烙铁头或参数严重错误

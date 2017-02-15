@@ -1,5 +1,5 @@
 /*
-ËµÃ÷: ¶ÔÅäÖÃĞÅÏ¢½øĞĞÉèÖÃ²Ù×÷Í¨¹ı´®¿Ú
+è¯´æ˜: å¯¹é…ç½®ä¿¡æ¯è¿›è¡Œè®¾ç½®æ“ä½œé€šè¿‡ä¸²å£
 */
 
 #include "uart.h"
@@ -48,8 +48,8 @@ BOOL TING,RING;
 BOOL TEND,REND;
 
 
-unsigned char uartDataSize; //´®¿ÚÒÑ¶ÁÈ¡Êı¾İ³¤¶È
-unsigned char uartbuf[16];  //´®¿ÚÊı¾İ»º´æ
+unsigned char uartDataSize; //ä¸²å£å·²è¯»å–æ•°æ®é•¿åº¦
+unsigned char uartbuf[16];  //ä¸²å£æ•°æ®ç¼“å­˜
 
 void UART_SendByte(char byte)
 {
@@ -79,12 +79,12 @@ void UART_SendString(char *str)
 
 void UART_Interrupt(void)
 {
-    /*¹¦ÄÜ; ´®¿ÚÖĞ¶Ï³ÌĞò Ä£Äâ*/
-    if (REND)                       //ÅĞ¶ÏÊÇ½ÓÊÕÖĞ¶Ï²úÉú
+    /*åŠŸèƒ½; ä¸²å£ä¸­æ–­ç¨‹åº æ¨¡æ‹Ÿ*/
+    if (REND)                       //åˆ¤æ–­æ˜¯æ¥æ”¶ä¸­æ–­äº§ç”Ÿ
     {
-        REND=0;                      //±êÖ¾Î»ÇåÁã
-        uartbuf[uartDataSize++ & 0x0f] = RBUF;  //¶ÁÈë»º³åÇøµÄÖµ
-        //SBUF=Temp; //°Ñ½ÓÊÕµ½µÄÖµÔÙ·¢»ØµçÄÔ¶Ë
+        REND=0;                      //æ ‡å¿—ä½æ¸…é›¶
+        uartbuf[uartDataSize++ & 0x0f] = RBUF;  //è¯»å…¥ç¼“å†²åŒºçš„å€¼
+        //SBUF=Temp; //æŠŠæ¥æ”¶åˆ°çš„å€¼å†å‘å›ç”µè„‘ç«¯
 #ifdef __CHKISP_H__
         ISPCheck( RBUF);
 #endif
@@ -100,7 +100,7 @@ void UartInit(void)
     TH0 = BAUD>>8;                        //initial timer0 and set reload value
     TR0 = 1;                                //tiemr0 start running
     ET0 = 1;                                //enable timer0 interrupt
-    //PT0 = 1;                                //µÍÖĞ¶ÏÓÅÏÈ¼¶
+    //PT0 = 1;                                //ä½ä¸­æ–­ä¼˜å…ˆçº§
     //EA = 1;                                 //open global interrupt switch
 
     TING = 0;
@@ -126,7 +126,7 @@ void Timer0_Interrupt(void) interrupt 1 using 1
                 RBUF = RDAT;              //save the data to RBUF
                 RING = 0;                 //stop receive
                 REND = 1;                 //set receive completed flag
-                UART_Interrupt();         //Ä£Äâµ÷ÓÃÖĞ¶Ï´¦Àí³ÌĞò
+                UART_Interrupt();         //æ¨¡æ‹Ÿè°ƒç”¨ä¸­æ–­å¤„ç†ç¨‹åº
             }
             else
             {

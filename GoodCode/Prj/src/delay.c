@@ -1,7 +1,7 @@
 #include "delay.h"
 #include <intrins.h>
 
-/* Ê±ÖÓÆµÂÊ 22.1184MHz */
+/* æ—¶é’Ÿé¢‘ç‡ 22.1184MHz */
 
 void delayus(unsigned char t)
 {
